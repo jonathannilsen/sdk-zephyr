@@ -250,21 +250,3 @@ int stream_flash_init(struct stream_flash_ctx *ctx, const struct device *fdev,
 
 	return 0;
 }
-
-int stream_flash_finish(struct stream_flash_ctx *ctx, bool flush)
-{
-	int rc = 0;
-
-	if (!ctx ) {
-		return -EFAULT;
-	}
-	if (flush) {
-		rc = stream_flash_buffered_write(ctx, NULL, 0, true);
-		if (rc != 0) {
-			LOG_ERR("Error %d while flushing stream buffer", rc);
-		}
-	}
-
-	return rc;
-}
-
