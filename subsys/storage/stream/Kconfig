@@ -11,20 +11,31 @@ menuconfig STREAM_FLASH
 	  Enable support of stream to flash API
 
 if STREAM_FLASH
+
+choice STREAM_FLASH_BACKEND
+	default STREAM_FLASH_VOLATILE
+
+config STREAM_FLASH_VOLATILE
+	bool "Do not store flash write progress"
+	help
+	  If enabled, the current write progress will not be stored to flash.
+
+config STREAM_FLASH_NV
+	bool "Store flash write progress"
+	depends on SETTINGS
+	depends on !SETTINGS_NONE
+	help
+	  If enabled, the current write progress is stored to flash using the
+	  settings subsystem. In case of power failure or device reset, the
+	  operation can then resume from the latest state.
+
+endchoice
+
 config STREAM_FLASH_ERASE
 	bool "Perform erase operations"
 	help
 	  If disabled an external actor must erase the flash area being written
 	  to.
-
-config STREAM_FLASH_SAVE_PROGRESS
-	bool "Store flash write progress"
-	depends on SETTINGS
-	depends on !SETTINGS_NONE  # FIXME: Is this required?
-	help
-	  If enabled, the current write progress is stored to flash using the
-	  settings subsystem. In case of power failure or device reset, the
-	  operation can then resume from the latest state.
 
 module = STREAM_FLASH
 module-str = stream flash
