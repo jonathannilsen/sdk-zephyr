@@ -62,9 +62,6 @@ struct stream_flash_ctx {
 #ifdef CONFIG_STREAM_FLASH_ERASE
 	off_t last_erased_page_start_offset; /* Last erased offset */
 #endif
-#ifdef CONFIG_STREAM_FLASH_SAVE_PROGRESS
-	const char *progress_key;
-#endif
 };
 
 /**
@@ -86,7 +83,7 @@ struct stream_flash_ctx {
  */
 int stream_flash_init(struct stream_flash_ctx *ctx, const struct device *fdev,
 		      uint8_t *buf, size_t buf_len, size_t offset, size_t size,
-		      stream_flash_callback_t cb, const char *id);
+		      stream_flash_callback_t cb);
 /**
  * @brief Read number of bytes written to the flash.
  *
