@@ -77,8 +77,7 @@ struct stream_flash_ctx {
  *             If this is '0', the size will be set to the total size
  *             of the flash device minus the offset.
  * @param cb Callback to be invoked on completed flash write operations.
- * @param id Unique identifier for this stream, used to store write progress.
- *           Can be set to NULL to disable progress saving for the stream.
+ *
  * @return non-negative on success, negative errno code on fail
  */
 int stream_flash_init(struct stream_flash_ctx *ctx, const struct device *fdev,
@@ -128,23 +127,6 @@ int stream_flash_buffered_write(struct stream_flash_ctx *ctx, const uint8_t *dat
  * @return non-negative on success, negative errno code on fail
  */
 int stream_flash_erase_page(struct stream_flash_ctx *ctx, off_t off);
-
-
-int stream_flash_finish(struct stream_flash_ctx *ctx, bool flush);
-
-
-/* XXX: alternate API that can be used if the init API should not be
- * modified to automatically enable/load whenever an id is specified.
- */
-int stream_flash_progress_enable(struct stream_flash_ctx *ctx, const char *key,
-				 bool load);
-
-int stream_flash_progress_disable(struct stream_flash_ctx *ctx, bool clear);
-
-int stream_flash_progress_save(struct stream_flash_ctx *ctx);
-
-int stream_flash_progress_load(struct stream_flash_ctx *ctx);
-
 
 #ifdef __cplusplus
 }

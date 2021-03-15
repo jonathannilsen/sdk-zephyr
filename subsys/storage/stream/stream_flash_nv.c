@@ -1,6 +1,16 @@
 #include <storage/stream_flash_nv.h>
 #include <settings/settings.h>
 
+#define LOG_MODULE_NAME STREAM_FLASH
+#define LOG_LEVEL CONFIG_STREAM_FLASH_LOG_LEVEL
+#include <logging/log.h>
+LOG_MODULE_DECLARE(LOG_MODULE_NAME, LOG_LEVEL);
+
+static inline bool progress_enabled(struct stream_flash_nv_ctx *ctx)
+{
+	return ctx->progress_key != NULL;
+}
+
 static int settings_direct_loader(const char *key, size_t len,
 				  settings_read_cb read_cb, void *cb_arg,
 				  void *param)
@@ -9,7 +19,7 @@ static int settings_direct_loader(const char *key, size_t len,
 	struct stream_flash_ctx *sf_ctx = &ctx->sf_ctx;
 
 	/* Handle the subtree if it is an exact key match. */
-	if (settings_name_next(key, NULL) == 0) {
+	if (progress_enabled(ctx) && settings_name_next(key, NULL) == 0) {
 		ssize_t len = read_cb(cb_arg, &sf_ctx->bytes_written,
 				      sizeof(sf_ctx->bytes_written));
 
@@ -63,12 +73,22 @@ static int progress_load(struct stream_flash_nv_ctx *ctx)
 	return rc;
 }
 
+static int progress_clear(struct stream_flash_nv_ctx *ctx)
+{
+	int rc = settings_delete(ctx->progress_key);
+	if (rc != 0) {
+		LOG_ERR("Error %d while deleting progress", rc);
+	}
+
+	return rc;
+}
+
 int stream_flash_nv_init(struct stream_flash_nv_ctx *ctx,
 			 const struct device *fdev, uint8_t *buf,
 			 size_t buf_len, size_t offset, size_t size,
 			 stream_flash_callback_t cb, const char *id)
 {
-	if (!id) {
+	if (!ctx) {
 		return -EFAULT;
 	}
 
@@ -81,7 +101,9 @@ int stream_flash_nv_init(struct stream_flash_nv_ctx *ctx,
 	rc = stream_flash_init(&ctx->sf_ctx, fdev, buf, buf_len, offset, cb);
 	if (rc == 0) {
 		ctx->progress_key = id;
-		rc = progress_load(ctx);
+		if (progress_enabled(ctx)) {
+			rc = progress_load(ctx);
+		}
 	}
 
 	return rc;
@@ -91,63 +113,33 @@ int stream_flash_nv_buffered_write(struct stream_flash_nv_ctx *ctx,
 				   const uint8_t *data,
 				   size_t len, bool flush)
 {
-	if (!ctx || !ctx->progress_key) {
+	if (!ctx) {
 		return -EFAULT;
 	}
 
 	int rc = stream_flash_buffered_write(&ctx->sf_ctx, data, len, flush);
 	
-	if (rc == 0) {
+	if (rc == 0 && progress_enabled(ctx)) {
 		rc = progress_save(ctx);
 	}
 
 	return rc;
 }
 
-int stream_flash_nv_finish(struct stream_flash_nv_ctx *ctx, bool flush,
-			   bool clear_progress)
+int stream_flash_nv_finish(struct stream_flash_nv_ctx *ctx, bool clear_progress)
 {
-	int rc = 0;
+	int rc;
 
-	if (!ctx || !ctx->progress_key) {
+	if (!ctx) {
 		return -EFAULT;
 	}
 
-	/* XXX: the flushing can be taken out of here if it is unnecessary. */
-	if (flush) {
-		rc = stream_flash_buffered_write(&ctx->sf_ctx, NULL, 0, true);
-		if (rc != 0) {
-			LOG_ERR("Error %d while flushing stream buffer", rc);
-		}
-	}
-
-	if (clear_progress) {
-		rc = settings_delete(ctx->progress_key);
-		if (rc != 0) {
-			LOG_ERR("Error %d while deleting progress", rc);
-		}
+	if (clear_progress && progress_enabled(ctx)) {
+		rc = progress_clear(ctx);
+	} else {
+		rc = progress_save(ctx);
 	}
 	ctx->progress_key = NULL;
 
 	return rc;
 }
-
-
-/* FIXME: is this API necessary? */
-#if 0
-int stream_flash_progress_load(struct stream_flash_ctx *ctx)
-{
-	if (!ctx) {
-		return -EFAULT;
-	}
-	return progress_load(ctx);
-}
-
-int stream_flash_progress_save(struct stream_flash_ctx *ctx)
-{
-	if (!ctx) {
-		return -EFAULT;
-	}
-	return progress_save(ctx);
-}
-#endif

@@ -22,24 +22,16 @@ int stream_flash_nv_buffered_write(struct stream_flash_nv_ctx *ctx,
 static inline size_t stream_flash_nv_bytes_written(
 	struct stream_flash_nv_ctx *ctx)
 {
-	if (!ctx || !ctx->progress_key) {
-		return -EFAULT;
-	}
-
 	return stream_flash_bytes_written(&ctx->sf_ctx);
 }
 
 static inline int stream_flash_nv_erase_page(struct stream_flash_nv_ctx *ctx,
 					     off_t off)
 {
-	if (!ctx || !ctx->progress_key) {
-		return -EFAULT;
-	}
-
 	return stream_flash_erase_page(&ctx->sf_ctx, off);
 }
 
-int stream_flash_nv_finish(struct stream_flash_nv_ctx *ctx, bool flush,
+int stream_flash_nv_finish(struct stream_flash_nv_ctx *ctx,
 			   bool clear_progress);
 
 

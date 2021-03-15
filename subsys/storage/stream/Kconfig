@@ -12,25 +12,6 @@ menuconfig STREAM_FLASH
 
 if STREAM_FLASH
 
-choice STREAM_FLASH_BACKEND
-	default STREAM_FLASH_VOLATILE
-
-config STREAM_FLASH_VOLATILE
-	bool "Do not store flash write progress"
-	help
-	  If enabled, the current write progress will not be stored to flash.
-
-config STREAM_FLASH_NV
-	bool "Store flash write progress"
-	depends on SETTINGS
-	depends on !SETTINGS_NONE
-	help
-	  If enabled, the current write progress is stored to flash using the
-	  settings subsystem. In case of power failure or device reset, the
-	  operation can then resume from the latest state.
-
-endchoice
-
 config STREAM_FLASH_ERASE
 	bool "Perform erase operations"
 	help
@@ -42,3 +23,13 @@ module-str = stream flash
 source "subsys/logging/Kconfig.template.log_config"
 
 endif # STREAM_FLASH
+
+config STREAM_FLASH_NV
+	bool "Stream to flash (nonvolatile)"
+	depends on SETTINGS
+	depends on !SETTINGS_NONE
+	help
+	  Enable alternate stream to flash API which also stores the current
+	  write progress to flash using the settings subsystem. In case of power
+	  failure or device reset, the operation can then resume from the latest
+	  state.
