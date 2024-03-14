@@ -35,6 +35,7 @@
 
 	aliases {
 		resetinfo = &cpurad_resetinfo;
+		ipc-to-cpusys = &cpurad_cpusys_ipc;
 	};
 };
 
