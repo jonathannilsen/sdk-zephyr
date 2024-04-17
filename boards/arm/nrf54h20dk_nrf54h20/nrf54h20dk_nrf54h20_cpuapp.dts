@@ -101,11 +101,7 @@
 	status = "okay";
 };
 
-&cpuapp_cpurad_ram0x_region {
-	status = "okay";
-};
-
-&shared_ram3x_region {
+&cpuapp_ram3x_region {
 	status = "okay";
 };
 

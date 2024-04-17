@@ -50,31 +50,40 @@
 			};
 		};
 
-		cpuapp_cpurad_ram0x_region: memory@2f0bf000 {
+		cpuapp_cpurad_ram0x_region_2: memory@2f0bf000 {
 			compatible = "nordic,owned-memory";
 			reg = <0x2f0bf000 DT_SIZE_K(4)>;
 			status = "disabled";
 			perm-read;
 			perm-write;
+			owner-id = <2>;
 			#address-cells = <1>;
 			#size-cells = <1>;
 			ranges = <0x0 0x2f0bf000 0x1000>;
 
-			cpuapp_cpurad_ipc_shm: memory@0 {
-				reg = <0x0 DT_SIZE_K(2)>;
-			};
+			cpuapp_cpurad_ram0x_region_3: memory@0 {
+				compatible = "nordic,owned-memory";
+				reg = <0x0 DT_SIZE_K(4)>;
+				status = "disabled";
+				perm-read;
+				perm-write;
+				owner-id = <3>;
+				#address-cells = <1>;
+				#size-cells = <1>;
+				ranges = <0x0 0x0 0x1000>;
 
-			cpurad_cpuapp_ipc_shm: memory@800 {
-				reg = <0x800 DT_SIZE_K(2)>;
+				cpuapp_cpurad_ipc_shm: memory@0 {
+					reg = <0x0 DT_SIZE_K(2)>;
+				};
+
+				cpurad_cpuapp_ipc_shm: memory@800 {
+					reg = <0x800 DT_SIZE_K(2)>;
+				};
 			};
 		};
 
 		shared_ram20_region: memory@2f88f000 {
-			compatible = "nordic,owned-memory";
 			reg = <0x2f88f000 DT_SIZE_K(4)>;
-			status = "disabled";
-			perm-read;
-			perm-write;
 			#address-cells = <1>;
 			#size-cells = <1>;
 			ranges = <0x0 0x2f88f000 0x1000>;
@@ -120,15 +129,15 @@
 			};
 		};
 
-		shared_ram3x_region: memory@2fc12000 {
+		cpuapp_ram3x_region: memory@2fc12000 {
 			compatible = "nordic,owned-memory";
-			reg = <0x2fc12000 DT_SIZE_K(8)>;
+			reg = <0x2fc12000 DT_SIZE_K(4)>;
 			status = "disabled";
 			perm-read;
 			perm-write;
 			#address-cells = <1>;
 			#size-cells = <1>;
-			ranges = <0x0 0x2fc12000 0x2000>;
+			ranges = <0x0 0x2fc12000 0x1000>;
 
 			cpuapp_dma_region: memory@e80 {
 				compatible = "zephyr,memory-region";
@@ -137,10 +146,21 @@
 				#memory-region-cells = <0>;
 				zephyr,memory-region = "DMA_RAM3x_APP";
 			};
+		};
 
-			cpurad_dma_region: memory@1e80 {
+		cpurad_ram3x_region: memory@2fc13000 {
+			compatible = "nordic,owned-memory";
+			reg = <0x2fc13000 DT_SIZE_K(4)>;
+			status = "disabled";
+			perm-read;
+			perm-write;
+			#address-cells = <1>;
+			#size-cells = <1>;
+			ranges = <0x0 0x2fc13000 0x1000>;
+
+			cpurad_dma_region: memory@e80 {
 				compatible = "zephyr,memory-region";
-				reg = <0x1e80 0x80>;
+				reg = <0xe80 0x80>;
 				status = "disabled";
 				#memory-region-cells = <0>;
 				zephyr,memory-region = "DMA_RAM3x_RAD";
