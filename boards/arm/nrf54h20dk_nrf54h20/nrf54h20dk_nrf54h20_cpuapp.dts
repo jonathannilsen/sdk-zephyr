@@ -24,6 +24,7 @@
 		zephyr,flash = &mram1x;
 		zephyr,sram = &cpuapp_data;
 		zephyr,entropy = &prng;
+		zephyr,bt-hci-ipc = &ipc0;
 	};
 
 	aliases {
@@ -100,15 +101,24 @@
 	status = "okay";
 };
 
+&cpuapp_cpurad_ram0x_region {
+	status = "okay";
+};
+
 &shared_ram3x_region {
 	status = "okay";
 };
 
 &cpuapp_bellboard {
+	status = "okay";
 	interrupts = <96 NRF_DEFAULT_IRQ_PRIORITY>;
 	interrupt-names = "irq0";
 	/* irq0: 0: cpuapp-cpusec, 6: cpuapp-cpusys, 13: cpuapp-cpuppr, 18: cpuapp-cpurad */
 	nordic,interrupt-mapping = <0x00042041 0>;
+};
+
+&cpurad_bellboard {
+	status = "okay";
 };
 
 &cpusec_cpuapp_ipc {
@@ -117,11 +127,13 @@
 	rx-region = <&cpusec_cpuapp_ipc_shm>;
 };
 
-&cpuapp_cpurad_ipc {
-	compatible = "zephyr,ipc-icmsg-me-initiator";
+ipc0: &cpuapp_cpurad_ipc {
+	status = "okay";
 	mbox-names = "rx", "tx";
 	tx-region = <&cpuapp_cpurad_ipc_shm>;
 	rx-region = <&cpurad_cpuapp_ipc_shm>;
+	tx-blocks = <32>;
+	rx-blocks = <32>;
 };
 
 &cpuapp_cpusys_ipc {
