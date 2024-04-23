@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 zephyr_library_sources(soc.c)
+zephyr_sources_ifdef(CONFIG_POWEROFF poweroff.c)
 
 # Ensure that image size aligns with 16 bytes so that MRAMC finalizes all writes
 # for the image correctly
