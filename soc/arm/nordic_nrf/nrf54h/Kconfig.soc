@@ -9,9 +9,6 @@ config SOC_NRF54H20
 
 if SOC_NRF54H20
 
-choice
-	prompt "nRF54H20 MCU Selection"
-
 config SOC_NRF54H20_CPUAPP
 	bool "nRF54H20 CPUAPP"
 	select CPU_HAS_ARM_MPU
@@ -27,8 +24,6 @@ config SOC_NRF54H20_CPURAD
 	select CPU_HAS_DCACHE
 	select CPU_HAS_ICACHE
 	select CPU_HAS_FPU
-
-endchoice
 
 config NRF_ENABLE_ICACHE
 	bool "Instruction cache (I-Cache)"
