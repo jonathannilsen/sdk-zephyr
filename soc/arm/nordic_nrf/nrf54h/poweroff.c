@@ -13,18 +13,16 @@
 #include <hal/nrf_memconf.h>
 #include <zephyr/cache.h>
 
-#if defined(NRF_APPLICATION)
-#define RAMBLOCK_CONTROL_BIT_ICACHE 1
-#define RAMBLOCK_CONTROL_BIT_DCACHE 2
-#define RAMBLOCK_POWER_ID	    0
-#define RAMBLOCK_CONTROL_OFF	    0
-#elif defined(NRF_RADIOCORE)
+#if defined(NRF_RADIOCORE)
 #define RAMBLOCK_CONTROL_BIT_ICACHE 2
 #define RAMBLOCK_CONTROL_BIT_DCACHE 3
 #define RAMBLOCK_POWER_ID	    0
 #define RAMBLOCK_CONTROL_OFF	    0
 #else
-#error "Unsupported domain."
+#define RAMBLOCK_CONTROL_BIT_ICACHE 1
+#define RAMBLOCK_CONTROL_BIT_DCACHE 2
+#define RAMBLOCK_POWER_ID	    0
+#define RAMBLOCK_CONTROL_OFF	    0
 #endif
 
 static void suspend_common(void)
@@ -46,7 +44,6 @@ static void suspend_common(void)
 
 	/* Disable retention */
 	nrf_lrcconf_retain_set(NRF_LRCCONF010, NRF_LRCCONF_POWER_DOMAIN_0, false);
-	nrf_lrcconf_task_trigger(NRF_LRCCONF010, NRF_LRCCONF_TASK_SYSTEMOFFREADY);
 
 	k_cpu_idle();
 }
