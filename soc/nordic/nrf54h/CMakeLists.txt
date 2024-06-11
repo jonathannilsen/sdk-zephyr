@@ -7,7 +7,7 @@ endif()
 
 zephyr_library_sources_ifdef(CONFIG_CPU_HAS_CUSTOM_FIXED_SOC_MPU_REGIONS mpu_regions.c)
 
-if(CONFIG_PM OR CONFIG_POWEROFF)
+if(CONFIG_ARM AND (CONFIG_PM OR CONFIG_POWEROFF))
     zephyr_library_sources(power.c)
 endif()
 zephyr_library_sources_ifdef(CONFIG_PM_S2RAM pm_s2ram.c)
