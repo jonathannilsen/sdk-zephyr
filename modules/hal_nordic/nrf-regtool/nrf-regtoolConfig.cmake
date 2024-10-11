@@ -7,23 +7,37 @@ function(nrf_regtool_generate_hex_from_dts peripheral)
 
   # Prepare common argument sub-lists.
   string(REPEAT "-v;" ${CONFIG_NRF_REGTOOL_VERBOSITY} verbosity)
-  list(TRANSFORM CACHED_DTS_ROOT_BINDINGS PREPEND "--bindings-dir;" OUTPUT_VARIABLE bindings_dirs)
-  separate_arguments(extra_args UNIX_COMMAND "${CONFIG_NRF_REGTOOL_EXTRA_GENERATE_ARGS}")
-
   set(generated_hex_file ${PROJECT_BINARY_DIR}/${generated_hex_name})
-  execute_process(
-    COMMAND
-    ${CMAKE_COMMAND} -E env PYTHONPATH=${ZEPHYR_BASE}/scripts/dts/python-devicetree/src
-    ${NRF_REGTOOL} ${verbosity} generate
-    --peripheral ${peripheral}
-    --svd-file ${SOC_SVD_FILE}
-    --dts-file ${ZEPHYR_DTS}
-    ${bindings_dirs}
-    --output-file ${generated_hex_file}
-    ${extra_args}
-    WORKING_DIRECTORY ${APPLICATION_SOURCE_DIR}
-    COMMAND_ERROR_IS_FATAL ANY
-  )
+
+  if(peripheral STREQUAL "UICR")
+    execute_process(
+      COMMAND
+      ${CMAKE_COMMAND} -E env PYTHONPATH=${ZEPHYR_BASE}/scripts/dts/python-devicetree/src
+      ${NRF_REGTOOL} ${verbosity} uicr-compile
+      --edt-pickle-file ${EDT_PICKLE}
+      --product-name ${CONFIG_SOC}
+      --output-file ${generated_hex_file}
+      WORKING_DIRECTORY ${APPLICATION_SOURCE_DIR}
+      COMMAND_ERROR_IS_FATAL ANY
+    )
+  else()
+    list(TRANSFORM CACHED_DTS_ROOT_BINDINGS PREPEND "--bindings-dir;" OUTPUT_VARIABLE bindings_dirs)
+    separate_arguments(extra_args UNIX_COMMAND "${CONFIG_NRF_REGTOOL_EXTRA_GENERATE_ARGS}")
+    execute_process(
+      COMMAND
+      ${CMAKE_COMMAND} -E env PYTHONPATH=${ZEPHYR_BASE}/scripts/dts/python-devicetree/src
+      ${NRF_REGTOOL} ${verbosity} generate
+      --peripheral ${peripheral}
+      --svd-file ${SOC_SVD_FILE}
+      --dts-file ${ZEPHYR_DTS}
+      ${bindings_dirs}
+      --output-file ${generated_hex_file}
+      ${extra_args}
+      WORKING_DIRECTORY ${APPLICATION_SOURCE_DIR}
+      COMMAND_ERROR_IS_FATAL ANY
+    )
+  endif()
+
   message(STATUS "Generated ${peripheral} hex file: ${generated_hex_file}")
 
   if(NOT peripheral STREQUAL "UICR")
