@@ -270,6 +270,9 @@ class NrfBinaryRunner(ZephyrBinaryRunner):
                 self.build_conf.getboolean('CONFIG_SOC_NRF9280_CPURAD')
             )
 
+            # Ensure that firmware is not executing while erasing/programming
+            self.exec_op("reset", option="RESET_VIA_SECDOM")
+
             if self.erase:
                 self.exec_op('erase', core='NRFDL_DEVICE_CORE_APPLICATION')
                 self.exec_op('erase', core='NRFDL_DEVICE_CORE_NETWORK')
@@ -298,16 +301,8 @@ class NrfBinaryRunner(ZephyrBinaryRunner):
                     self.op_program(app_root_envelope_hex_file, 'ERASE_NONE', None, defer=True, core='NRFDL_DEVICE_CORE_APPLICATION')
 
             if cpuapp:
-                if not self.erase and self.build_conf.getboolean('CONFIG_NRF_REGTOOL_GENERATE_UICR'):
-                    self.exec_op('erase', core='NRFDL_DEVICE_CORE_APPLICATION',
-                                 option={'chip_erase_mode': 'ERASE_UICR',
-                                         'qspi_erase_mode': 'ERASE_NONE'})
                 core = 'NRFDL_DEVICE_CORE_APPLICATION'
             elif cpurad:
-                if not self.erase and self.build_conf.getboolean('CONFIG_NRF_REGTOOL_GENERATE_UICR'):
-                    self.exec_op('erase', core='NRFDL_DEVICE_CORE_NETWORK',
-                                 option={'chip_erase_mode': 'ERASE_UICR',
-                                         'qspi_erase_mode': 'ERASE_NONE'})
                 core = 'NRFDL_DEVICE_CORE_NETWORK'
         else:
             if self.erase:
