@@ -1,7 +1,7 @@
 # Copyright (c) 2024 Nordic Semiconductor ASA
 # SPDX-License-Identifier: Apache-2.0
 
-function(nrf_regtool_generate_uicr generated_hex_file)
+function(nrf_regtool_generate_uicr generated_hex_file generated_debug_file)
   string(REPEAT "-v;" ${CONFIG_NRF_REGTOOL_VERBOSITY} verbosity)
   execute_process(
     COMMAND
@@ -10,6 +10,7 @@ function(nrf_regtool_generate_uicr generated_hex_file)
     --edt-pickle-file ${EDT_PICKLE}
     --product-name ${CONFIG_SOC}
     --output-file ${generated_hex_file}
+    --output-debug-file ${generated_debug_file}
     WORKING_DIRECTORY ${APPLICATION_SOURCE_DIR}
     COMMAND_ERROR_IS_FATAL ANY
   )
@@ -42,11 +43,8 @@ get_property(version GLOBAL PROPERTY nrf_regtool_version)
 foreach(component IN LISTS ${CMAKE_FIND_PACKAGE_NAME}_FIND_COMPONENTS)
   if(component STREQUAL "GENERATE:UICR")
     set(generated_hex_file ${PROJECT_BINARY_DIR}/uicr.hex)
-    if(version VERSION_GREATER_EQUAL 7.0.0)
-      nrf_regtool_generate_uicr(${generated_hex_file})
-    else()
-      nrf_regtool_generate_peripheral(UICR ${generated_hex_file})
-    endif()
+    set(generated_debug_file ${generated_hex_file}.debug.json)
+    nrf_regtool_generate_uicr(${generated_hex_file} ${generated_debug_file})
 
     # UICR must be flashed together with the Zephyr binary.
     set(merged_hex_file ${PROJECT_BINARY_DIR}/uicr_merged.hex)
