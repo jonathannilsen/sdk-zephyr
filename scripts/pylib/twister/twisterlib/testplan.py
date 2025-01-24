@@ -476,7 +476,8 @@ class TestPlan:
             # don't load the same board data twice
             if not bdirs.get(board.dir):
                 datas = []
-                for file in glob.glob(os.path.join(board.dir, "*.yaml")):
+                files = [f for d in board.directories for f in d.glob('*.yaml')]
+                for file in files:
                     if os.path.basename(file) == "twister.yaml":
                         continue
                     try:
