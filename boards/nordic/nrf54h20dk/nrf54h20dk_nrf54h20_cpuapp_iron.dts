@@ -9,6 +9,25 @@
 #include "nrf54h20dk_nrf54h20-memory_map_iron.dtsi"
 
 /delete-node/ &cpusec_cpurad_ipc;
+/delete-node/ &cpuapp_uicr;
+
+/ {
+	soc {
+		uicr: uicr@fff8000 {
+			compatible = "zephyr,memory-region", "nordic,nrf-uicr";
+			zephyr,memory-region = "UICR";
+			reg = <0xfff8000 DT_SIZE_K(2)>;
+			#address-cells = <1>;
+			#size-cells = <1>;
+			ranges = <0x0 0xfff8000 DT_SIZE_K(2)>;
+
+			bicr: bicr@7b0 {
+				compatible = "nordic,nrf-bicr";
+				reg = <0x7b0 48>;
+			};
+		};
+	};
+};
 
 / {
 	chosen {
