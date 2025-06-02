@@ -26,4 +26,4 @@ CONFIG_EXTERNAL_CACHE=y
 CONFIG_GPIO=y
 
 # UICR generation is not supported, and when reintroduced will not use nrf-regtool.
-CONFIG_NRF_REGTOOL_GENERATE_UICR=n
+# CONFIG_NRF_REGTOOL_GENERATE_UICR=n
