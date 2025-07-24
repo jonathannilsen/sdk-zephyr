@@ -74,7 +74,7 @@ endif
 
 config NRF_PERIPHCONF_SECTION
 	bool "Populate global peripheral initialization section"
-	default y if SOC_NRF54H20_CPUAPP
+	default y if SOC_NRF54H20_CPUAPP || SOC_NRF54H20_CPURAD
 	depends on LINKER_DEVNULL_SUPPORT
 	imply LINKER_DEVNULL_MEMORY
 	help
