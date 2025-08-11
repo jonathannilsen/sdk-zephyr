@@ -19,3 +19,24 @@ foreach(module ${kconfig_modules})
 
   set(ZEPHYR_${MODULE_NAME_UPPER}_KCONFIG ${module_dir}/Kconfig)
 endforeach()
+
+file(GLOB sysbuild_cmake_modules "${CMAKE_CURRENT_LIST_DIR}/*/sysbuild/CMakeLists.txt")
+
+foreach(module ${sysbuild_cmake_modules})
+  cmake_path(GET module PARENT_PATH module_sysbuild_dir)
+  cmake_path(GET module_sysbuild_dir PARENT_PATH module_dir)
+  cmake_path(GET module_dir STEM module_name)
+  zephyr_string(SANITIZE TOUPPER MODULE_NAME_UPPER ${module_name})
+
+  set(SYSBUILD_${MODULE_NAME_UPPER}_CMAKE_DIR ${module_sysbuild_dir})
+endforeach()
+
+file(GLOB sysbuild_kconfig_modules "${CMAKE_CURRENT_LIST_DIR}/*/Kconfig.sysbuild")
+
+foreach(module ${sysbuild_kconfig_modules})
+  cmake_path(GET module PARENT_PATH module_dir)
+  cmake_path(GET module_dir STEM module_name)
+  zephyr_string(SANITIZE TOUPPER MODULE_NAME_UPPER ${module_name})
+
+  set(SYSBUILD_${MODULE_NAME_UPPER}_KCONFIG ${module_dir}/Kconfig.sysbuild)
+endforeach()

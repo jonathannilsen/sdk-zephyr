@@ -66,4 +66,3 @@ config DMM_STATS
 endif # HAS_NORDIC_DMM
 
 rsource "vpr/Kconfig"
-rsource "uicr/Kconfig"
