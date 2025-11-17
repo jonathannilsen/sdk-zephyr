@@ -8,6 +8,7 @@ __constant U32 _CPUCONF_ADDR = 0x52011000;
 __constant U32 _CPUCONF_CPUWAIT_OFFSET = 0x50C;
 
 // ATBFUNNEL
+__constant U32 _ATBFUNNEL210_ADDR = 0xBF04C000;
 __constant U32 _ATBFUNNEL211_ADDR = 0xBF04D000;
 __constant U32 _ATBFUNNEL212_ADDR = 0xBF04E000;
 __constant U32 _ATBFUNNEL_CTRLREG_OFFSET = 0x0;
@@ -33,6 +34,9 @@ __constant U32 _FONFLIN = 0x10;
 __constant U32 _ENFTC = 0x1;
 __constant U32 _TPIU_SYNC_FRAME_COUNT = 0x8;
 __constant U32 _CURRENTPORTSIZE_4 = 0x8;
+
+// ETB
+__constant U32 _ETB_ADDR = 0xBF044000;
 
 // CoreSight general
 __constant U32 _CORESIGHT_LAR_OFFSET = 0xFB0;
@@ -109,6 +113,44 @@ int _SetupETMTPIUTrace(void)
 	return 0;
 }
 
+// Set up CoreSight and other necessary configuration so to enable ETM -> TPIU tracing.
+int _SetupETMETBTrace(void)
+{
+	U32 ctrlreg_old;
+	U32 ctrlreg_new;
+	U32 idfilter0_old;
+	U32 idfilter1_old;
+	U32 idfilter0_new;
+	U32 idfilter1_new;
+
+	// Set up ATB funnels/replicators to route ApplicationDomain ETM to ETB
+
+	_CSUnlock(_ATBFUNNEL212_ADDR);
+	ctrlreg_old = JLINK_MEM_ReadU32(_ATBFUNNEL212_ADDR + _ATBFUNNEL_CTRLREG_OFFSET);
+	ctrlreg_new = (ctrlreg_old & ~_ATBFUNNEL_HOLDTIME_MASK) | _HOLDTIME_4 | _ENS0;
+	JLINK_MEM_WriteU32(_ATBFUNNEL212_ADDR + _ATBFUNNEL_CTRLREG_OFFSET, ctrlreg_new);
+	_CSLock(_ATBFUNNEL212_ADDR);
+
+	_CSUnlock(_ATBREPLICATOR212_ADDR);
+	idfilter0_old = JLINK_MEM_ReadU32(_ATBREPLICATOR212_ADDR + _ATBREPLICATOR_IDFILTER0_OFFSET);
+	idfilter1_old = JLINK_MEM_ReadU32(_ATBREPLICATOR212_ADDR + _ATBREPLICATOR_IDFILTER1_OFFSET);
+
+	idfilter0_new = idfilter0_old & ~_ATBREPLICATOR_IDFILTER_ETM;  // CLEAR for output 0
+	idfilter1_new = idfilter1_old | _ATBREPLICATOR_IDFILTER_ETM; // SET for output 1
+
+	JLINK_MEM_WriteU32(_ATBREPLICATOR212_ADDR + _ATBREPLICATOR_IDFILTER0_OFFSET, idfilter0_new);
+	JLINK_MEM_WriteU32(_ATBREPLICATOR212_ADDR + _ATBREPLICATOR_IDFILTER1_OFFSET, idfilter1_new);
+	_CSLock(_ATBREPLICATOR212_ADDR);
+
+	_CSUnlock(_ATBFUNNEL210_ADDR);
+	ctrlreg_old = JLINK_MEM_ReadU32(_ATBFUNNEL210_ADDR + _ATBFUNNEL_CTRLREG_OFFSET);
+	ctrlreg_new = (ctrlreg_old & ~_ATBFUNNEL_HOLDTIME_MASK) | _HOLDTIME_4 | _ENS0;
+	JLINK_MEM_WriteU32(_ATBFUNNEL210_ADDR + _ATBFUNNEL_CTRLREG_OFFSET, ctrlreg_new);
+	_CSLock(_ATBFUNNEL210_ADDR);
+
+	return 0;
+}
+
 int ConfigTargetSettings(void)
 {
 	JLINK_ExecCommand("CORESIGHT_AddAP = Index=0 Type=AHB-AP");
@@ -116,8 +158,11 @@ int ConfigTargetSettings(void)
 
 	// Adjust trace sample delay to compensate for timing when using 320MHz
 	JLINK_ExecCommand("TraceSampleAdjust TD = 1000");
+	// Allow traces to continue even after encountering an invalid packet
+	JLINK_ExecCommand("TRACE_SetAllowContinueOnInvalidPacket = 1");
 
 	JLINK_ExecCommand("CORESIGHT_SetTPIUBaseAddr = 0xBF043000");
+	JLINK_ExecCommand("CORESIGHT_SetETBBaseAddr = 0xBF044000");
 
 	return 0;
 }
@@ -137,7 +182,13 @@ int OnTraceStart(void)
 {
 	// Set up CoreSight if not already configured
 	if (_needCoresightSetup) {
-		_SetupETMTPIUTrace();
+		if (EMU_ETM_UseETM) {
+			JLINK_SYS_Report("Setting up ETM -> TPIU trace");
+			_SetupETMTPIUTrace();
+		} else {
+			JLINK_SYS_Report("Setting up ETM -> ETB trace");
+			_SetupETMETBTrace();
+		}
 		_needCoresightSetup = 0;
 	}
 
