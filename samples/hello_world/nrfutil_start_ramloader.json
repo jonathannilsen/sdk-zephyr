@@ -1,0 +1,37 @@
+{
+  "nrfutil_device_version": "2.15.5",
+  "operations": [
+    {
+      "core": "NRFDL_DEVICE_CORE_APPLICATION",
+      "operation": {
+        "chip_erase_mode": "ERASE_NONE",
+        "firmware": {
+          "file": "build/hello_world/zephyr/zephyr.hex"
+        },
+        "type": "program"
+      }
+    },
+    {
+      "core": "NRFDL_DEVICE_CORE_APPLICATION",
+      "operation": {
+        "address": "0xe000ed08",
+        "data": [
+          0,
+          0,
+          0,
+          47
+        ],
+        "direct": true,
+        "type": "memory-write"
+      }
+    },
+    {
+      "core": "NRFDL_DEVICE_CORE_APPLICATION",
+      "operation": {
+        "program_counter": "0x2f002ad1",
+        "stack_pointer": "0x2f010ac0",
+        "type": "go"
+      }
+    }
+  ]
+}
