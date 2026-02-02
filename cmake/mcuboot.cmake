@@ -114,6 +114,9 @@ function(zephyr_mcuboot_tasks)
     set(imgtool_args)
   endif()
 
+  zephyr_get(MCUBOOT_EXTRA_IMGTOOL_ARGS)
+  list(APPEND imgtool_args ${MCUBOOT_EXTRA_IMGTOOL_ARGS})
+
   if(NOT "${keyfile}" STREQUAL "")
     set(imgtool_args --key "${keyfile}" ${imgtool_args})
   endif()
