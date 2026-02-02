@@ -138,3 +138,19 @@ void ironside_se_call_release(struct ironside_se_call_buf *buf)
 
 	k_event_post(&alloc_evts, buf_bit);
 }
+
+/* TODO: move to own file - also include bounce buffer glue. */
+void ironside_se_data_cache_writeback(void *addr, size_t size)
+{
+	sys_cache_data_flush_range(addr, size);
+}
+
+void ironside_se_data_cache_invalidate(void *addr, size_t size)
+{
+	sys_cache_data_invd_range(addr, size);
+}
+
+void ironside_se_data_cache_writeback_invalidate(void *addr, size_t size)
+{
+	sys_cache_data_flush_and_invd_range(addr, size);
+}
