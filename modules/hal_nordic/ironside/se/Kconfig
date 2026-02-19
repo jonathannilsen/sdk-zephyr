@@ -10,14 +10,30 @@ menu "IronSide SE"
 config IRONSIDE_SE_CALL
 	bool "IronSide calls"
 	default y
+	help
+	  Support for IronSide call APIs.
+
+if IRONSIDE_SE_CALL
+
+config IRONSIDE_SE_CALL_ZEPHYR
+	bool
+	default y if !IRONSIDE_SE_CALL_MINIMAL
 	depends on DT_HAS_NORDIC_IRONSIDE_CALL_ENABLED
 	depends on MULTITHREADING
 	select EVENTS
 	select MBOX
 	help
-	  Support for IronSide call APIs.
+	  Use the default driver for IronSide calls which supports concurrent
+	  calls being made from different threads.
 
-if IRONSIDE_SE_CALL
+config IRONSIDE_SE_CALL_MINIMAL
+	bool "Use minimal driver"
+	help
+	  Use the minimal driver for IronSide calls which is included with the
+	  IronSide APIs. This driver does not support concurrent calls from different
+	  threads, and uses busy waiting instead of interrupts when waiting for a
+	  reply from IronSide SE. This option is primarily intended for constrained
+	  firmwares such as bootloaders and is not recommended for general use.
 
 config IRONSIDE_SE_CALL_INIT_PRIORITY
 	int "IronSide calls' driver initialization priority"
