@@ -339,4 +339,34 @@ config GEN_UICR_POLICY_PERIPHCONF_STAGE_VALUE
 	default 0x1730C77F if GEN_UICR_POLICY_PERIPHCONF_STAGE_NORMAL
 	default 0
 
+choice GEN_UICR_POLICY_MPCCONF_STAGE
+	bool "UICR.POLICY_MPCCONFSTAGE"
+	default GEN_UICR_POLICY_MPCCONF_STAGE_NORMAL
+	help
+	  Sets the behavior of the IronSide SE MPCCONF service APIs at boot.
+
+config GEN_UICR_POLICY_MPCCONF_STAGE_NORMAL
+	bool "Normal operation stage"
+	help
+	  The API starts in the normal operation stage, meaning that no explicit
+	  API call is needed to finish initialization.
+
+config GEN_UICR_POLICY_MPCCONF_STAGE_INIT
+	bool "Initialization stage"
+	help
+	  The API starts in the initialization stage, which gives permission
+	  to update the global domain MPC configuration. To finish initialization,
+	  the application must notify IronSide SE via the ironside_se_mpcconf_finish_init() API.
+
+	  Enabling this policy option causes the generated UICR format version to be set
+	  to >= 2.2, which requires IronSide SE v23.4.0+27 or higher to be installed.
+
+endchoice
+
+config GEN_UICR_POLICY_MPCCONF_STAGE_VALUE
+	hex
+	default 0xBD2328A8 if GEN_UICR_POLICY_MPCCONF_STAGE_INIT
+	default 0x1730C77F if GEN_UICR_POLICY_MPCCONF_STAGE_NORMAL
+	default 0
+
 endmenu
