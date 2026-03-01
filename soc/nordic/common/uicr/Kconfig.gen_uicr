@@ -4,9 +4,18 @@
 menu "UICR generator options"
 	depends on IS_GEN_UICR_IMAGE
 
+config GEN_UICR_PERIPHCONF
+	bool "UICR.PERIPHCONF"
+	depends on $(dt_nodelabel_enabled,periphconf_partition)
+	help
+	  When enabled, the UICR generator will configure the location
+	  of the peripheral configuration data, based on the
+	  periphconf_partition in device tree.
+
 config GEN_UICR_GENERATE_PERIPHCONF
 	bool "Generate PERIPHCONF hex alongside UICR"
 	default y
+	select GEN_UICR_PERIPHCONF
 	help
 	  When enabled, the UICR generator will populate the
 	  periphconf_partition partition.
@@ -93,6 +102,14 @@ config GEN_UICR_PROTECTEDMEM_SIZE_BYTES
 	help
 	  Size of the protected memory region in bytes.
 	  This value must be divisible by 4096 (4 kiB).
+
+config GEN_UICR_MPCCONF
+	bool "UICR.MPCCONF"
+	depends on $(dt_nodelabel_enabled,mpcconf_partition)
+	help
+	  When enabled, the UICR generator will configure the location
+	  of the MPC configuration data, based on the
+	  mpcconf_partition in device tree.
 
 config GEN_UICR_WDTSTART
 	bool "UICR.WDTSTART"
@@ -186,9 +203,18 @@ config GEN_UICR_SECONDARY
 
 if GEN_UICR_SECONDARY
 
+config GEN_UICR_SECONDARY_PERIPHCONF
+	bool "UICR.SECONDARY.PERIPHCONF"
+	depends on $(dt_nodelabel_enabled,secondary_periphconf_partition)
+	help
+	  When enabled, the UICR generator will configure the location
+	  of the peripheral configuration data for the secondary firmware,
+	  based on the secondary_periphconf_partition in device tree.
+
 config GEN_UICR_SECONDARY_GENERATE_PERIPHCONF
 	bool "Generate SECONDARY.PERIPHCONF hex alongside UICR"
 	default y
+	select GEN_UICR_SECONDARY_PERIPHCONF
 	help
 	  When enabled, the UICR generator will populate the
 	  secondary_periphconf_partition partition.
@@ -271,6 +297,14 @@ config GEN_UICR_SECONDARY_PROTECTEDMEM_SIZE_BYTES
 	help
 	  Size of the secondary protected memory region in bytes.
 	  This value must be divisible by 4096 (4 kiB).
+
+config GEN_UICR_SECONDARY_MPCCONF
+	bool "UICR.SECONDARY.MPCCONF"
+	depends on $(dt_nodelabel_enabled,secondary_mpcconf_partition)
+	help
+	  When enabled, the UICR generator will configure the location
+	  of the MPC configuration data for the secondary firmware,
+	  based on the secondary_mpcconf_partition in device tree.
 
 endif # GEN_UICR_SECONDARY
 
