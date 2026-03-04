@@ -17,7 +17,7 @@ zephyr_library_sources_ifdef(CONFIG_IRONSIDE_SE_CALL_ZEPHYR call.c)
 zephyr_compile_definitions_ifdef(CONFIG_IRONSIDE_SE_CALL_MINIMAL IRONSIDE_SE_CALL_MINIMAL=1)
 zephyr_library_sources_ifdef(CONFIG_IRONSIDE_SE_DVFS dvfs.c)
 
-if(CONFIG_NRF_PERIPHCONF_SECTION)
+if(CONFIG_NRF_PERIPHCONF_SECTION OR CONFIG_NRF_MPCCONF_SECTION)
   zephyr_linker_sources(SECTIONS uicr.ld)
 endif()
 
@@ -47,6 +47,14 @@ endif()
 if(CONFIG_NRF_PERIPHCONF_SECTION AND NOT SYSBUILD)
   message(WARNING "CONFIG_NRF_PERIPHCONF_SECTION is enabled, but Sysbuild is not being used. "
                   "The global peripheral configuration will not be applied unless artifacts "
+                  "are generated manually/externally. To enable automatic generation, build with "
+                  "Sysbuild and ensure that SB_CONFIG_NRF_HALTIUM_GENERATE_UICR=y."
+  )
+endif()
+
+if(CONFIG_NRF_MPCCONF_SECTION AND NOT SYSBUILD)
+  message(WARNING "CONFIG_NRF_MPCCONF_SECTION is enabled, but Sysbuild is not being used. "
+                  "The MPC configuration will not be applied unless artifacts "
                   "are generated manually/externally. To enable automatic generation, build with "
                   "Sysbuild and ensure that SB_CONFIG_NRF_HALTIUM_GENERATE_UICR=y."
   )
