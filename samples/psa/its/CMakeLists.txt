@@ -5,3 +5,4 @@ find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(psa_its)
 
 target_sources(app PRIVATE src/main.c)
+target_include_directories(app PRIVATE ${ZEPHYR_TRUSTED_FIRMWARE_M_MODULE_DIR}/interface/include)
