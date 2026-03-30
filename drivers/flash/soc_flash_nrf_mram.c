@@ -357,7 +357,11 @@ static int nrf_mram_write(const struct device *dev, off_t offset, const void *da
 
 	if (ironside_se_ver >= IRONSIDE_SE_SUPPORT_READY_VER) {
 #if defined(CONFIG_MRAM_LATENCY)
-		mram_no_latency_sync_request();
+		ret = mram_no_latency_sync_request();
+		if (ret) {
+			LOG_ERR("Failed to request no-latency mode for MRAM write");
+			goto unlock;
+		}
 #endif
 	}
 
@@ -371,7 +375,7 @@ static int nrf_mram_write(const struct device *dev, off_t offset, const void *da
 		}
 		ret = nrf_mram_write_and_verify_partial(addr, data, len_break.first_word_bytes);
 		if (ret) {
-			goto unlock;
+			goto latency_release;
 		}
 		/* align to the next word boundary */
 		len = len_break.aligned_bytes;
@@ -387,7 +391,7 @@ static int nrf_mram_write(const struct device *dev, off_t offset, const void *da
 			addr + (i * MRAM_WORD_SIZE),
 			(void *)((uintptr_t)data + (i * MRAM_WORD_SIZE)), MRAM_WORD_SIZE);
 		if (ret) {
-			goto unlock;
+			goto latency_release;
 		}
 	}
 #if (WRITE_BLOCK_SIZE & MRAM_WORD_MASK)
@@ -400,17 +404,22 @@ static int nrf_mram_write(const struct device *dev, off_t offset, const void *da
 			(void *)((uintptr_t)data + len_break.aligned_bytes),
 			len_break.last_word_bytes);
 		if (ret) {
-			goto unlock;
+			goto latency_release;
 		}
 	}
 #endif
+latency_release:
 	if (ironside_se_ver >= IRONSIDE_SE_SUPPORT_READY_VER) {
 #if defined(CONFIG_MRAM_LATENCY)
-		mram_no_latency_sync_release();
+		ret = mram_no_latency_sync_release();
+		if (ret) {
+			LOG_ERR("Failed to release no-latency mode for MRAM write");
+		}
 #endif
 	}
-
+#if defined(CONFIG_MRAM_LATENCY)
 unlock:
+#endif
 	k_mutex_unlock(&nrf_mram_data->nrf_mram_mutex);
 	return ret;
 }
@@ -434,7 +443,11 @@ static int nrf_mram_erase(const struct device *dev, off_t offset, size_t size)
 	/* Ensure that the mramc banks are powered on */
 	if (ironside_se_ver >= IRONSIDE_SE_SUPPORT_READY_VER) {
 #if defined(CONFIG_MRAM_LATENCY)
-		mram_no_latency_sync_request();
+		ret = mram_no_latency_sync_request();
+		if (ret) {
+			LOG_ERR("Failed to request no-latency mode for MRAM erase");
+			goto unlock;
+		}
 #endif
 	}
 
@@ -448,7 +461,7 @@ static int nrf_mram_erase(const struct device *dev, off_t offset, size_t size)
 		}
 		ret = nrf_mram_erase_and_verify_partial(addr, len_break.first_word_bytes);
 		if (ret) {
-			goto unlock;
+			goto latency_release;
 		}
 		/* align to the next word boundary */
 		size = len_break.aligned_bytes;
@@ -462,7 +475,7 @@ static int nrf_mram_erase(const struct device *dev, off_t offset, size_t size)
 		}
 		ret = nrf_mram_erase_and_verify_word(addr + (i * MRAM_WORD_SIZE), MRAM_WORD_SIZE);
 		if (ret) {
-			goto unlock;
+			goto latency_release;
 		}
 	}
 
@@ -474,17 +487,22 @@ static int nrf_mram_erase(const struct device *dev, off_t offset, size_t size)
 		ret = nrf_mram_erase_and_verify_partial(addr + len_break.aligned_bytes,
 							len_break.last_word_bytes);
 		if (ret) {
-			goto unlock;
+			goto latency_release;
 		}
 	}
 #endif
+latency_release:
 	if (ironside_se_ver >= IRONSIDE_SE_SUPPORT_READY_VER) {
 #if defined(CONFIG_MRAM_LATENCY)
-		mram_no_latency_sync_release();
+		ret = mram_no_latency_sync_release();
+		if (ret) {
+			LOG_ERR("Failed to release no-latency mode for MRAM erase");
+		}
 #endif
 	}
-
+#if defined(CONFIG_MRAM_LATENCY)
 unlock:
+#endif
 	k_mutex_unlock(&nrf_mram_data->nrf_mram_mutex);
 	return ret;
 }
