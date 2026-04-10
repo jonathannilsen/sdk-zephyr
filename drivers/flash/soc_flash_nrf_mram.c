@@ -7,6 +7,7 @@
 #include <string.h>
 
 #include <zephyr/drivers/flash.h>
+#include <zephyr/kernel.h>
 #include <zephyr/logging/log.h>
 #include <zephyr/sys/barrier.h>
 #include <ironside/se/versions.h>
@@ -349,7 +350,7 @@ static int nrf_mram_write(const struct device *dev, off_t offset, const void *da
 	uint8_t ironside_se_ver = nrf_mram_data->ironside_se_ver;
 	int ret = 0;
 
-	const uintptr_t addr = validate_and_map_addr(offset, len, true);
+	uintptr_t addr = validate_and_map_addr(offset, len, true);
 
 	if (!addr) {
 		return -EINVAL;
@@ -434,7 +435,7 @@ static int nrf_mram_erase(const struct device *dev, off_t offset, size_t size)
 	uint8_t ironside_se_ver = nrf_mram_data->ironside_se_ver;
 	int ret = 0;
 
-	const uintptr_t addr = validate_and_map_addr(offset, size, true);
+	uintptr_t addr = validate_and_map_addr(offset, size, true);
 
 	if (!addr) {
 		return -EINVAL;
